@@ -16,9 +16,6 @@ mov sp, bp
 mov bx, MSG_LOGO
 call print_string
 
-; Print loading message
-mov bx, MSG_LOAD_KERNEL
-call print_string
 
 ; Delay for 1.5 seconds so the user can see the boot screen!
 ; INT 15h, AH=86h waits for CX:DX microseconds
@@ -66,7 +63,6 @@ print_string:
 
 ; Variables / Data
 BOOT_DRIVE: db 0
-MSG_LOAD_KERNEL: db 'Loading NanoOS Kernel...', 13, 10, 0
 MSG_DISK_ERROR: db 'Error loading kernel from disk!', 13, 10, 0
 
 ; Include the ASCII art logo

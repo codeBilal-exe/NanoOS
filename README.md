@@ -1,5 +1,14 @@
 # NanoOS
 
+```text
+ ███╗   ██╗  █████╗  ███╗   ██╗  ██████╗      ██████╗ ███████╗
+ ████╗  ██║ ██╔══██╗ ████╗  ██║ ██╔═══██╗    ██╔═══██╗██╔════╝
+ ██╔██╗ ██║ ███████║ ██╔██╗ ██║ ██║   ██║    ██║   ██║███████╗
+ ██║╚██╗██║ ██╔══██║ ██║╚██╗██║ ██║   ██║    ██║   ██║╚════██║
+ ██║ ╚████║ ██║  ██║ ██║ ╚████║ ╚██████╔╝    ╚██████╔╝███████║
+ ╚═╝  ╚═══╝ ╚═╝  ╚═╝ ╚═╝  ╚═══╝  ╚═════╝      ╚═════╝ ╚══════╝
+```
+
 A minimal, educational bootable terminal operating system written entirely in x86 Assembly (16-bit real mode). It bypasses Windows and Linux entirely, booting straight from the BIOS using a custom bootloader.
 
 ## Features

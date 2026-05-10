@@ -1,5 +1,4 @@
 admin:password
-user:user123
 bilal:241914
 ayan:241872
 aleena:241902
