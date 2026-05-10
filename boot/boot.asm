@@ -27,7 +27,7 @@ int 0x15
 
 ; Load Kernel from disk
 mov ah, 0x02        ; BIOS read sector function
-mov al, 5           ; Read 5 sectors
+mov al, 16          ; Read 16 sectors
 mov ch, 0           ; Cylinder 0
 mov dh, 0           ; Head 0
 mov cl, 2           ; Sector 2 (Sector 1 is our bootloader)
@@ -36,6 +36,9 @@ mov bx, 0x8000      ; Load to address 0x8000
 int 0x13
 
 jc disk_error       ; If carry flag is set, there was a disk error
+
+; Save boot drive for kernel to use
+mov byte [0x7E00], dl
 
 ; Jump to Kernel
 jmp 0x8000

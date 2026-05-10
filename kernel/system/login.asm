@@ -30,9 +30,23 @@ do_login:
     jmp .login_loop
 
 .login_success:
+    ; Check if the logged-in user is 'admin' and set flag
+    mov si, user_buffer
+    mov di, STR_ADMIN
+    call strcmp
+    jnc .not_admin
+    mov byte [is_admin], 1
+.not_admin:
     call cmd_clear
     mov bx, MSG_KERNEL_START
     call print_string
+    
+    ; Show admin notice if applicable
+    cmp byte [is_admin], 1
+    jne .done
+    mov bx, MSG_ADMIN_LOGIN
+    call print_string
+.done:
     ret
 
 
@@ -211,9 +225,15 @@ MSG_LOGIN_HEADER: db 'NanoOS User Authentication', 13, 10, 10, 0
 MSG_LOGIN_USER:   db 'Username: ', 0
 MSG_LOGIN_PASS:   db 'Password: ', 0
 MSG_LOGIN_FAIL:   db 'Access Denied.', 13, 10, 10, 0
+MSG_ADMIN_LOGIN:  db '[Admin] You have administrator privileges.', 13, 10
+                  db '        Type "admin" to see admin commands.', 13, 10, 10, 0
+
+STR_ADMIN:        db 'admin', 0
 
 user_buffer:      times 64 db 0
 
 USERS_DB:
     incbin "kernel/system/users.txt"
-    db 0    ; Null terminate the database
+USERS_DB_RUNTIME_END:       ; marker: where runtime data starts
+    times 512 db 0          ; extra writable space for adduser (in-memory + disk)
+USERS_DB_END equ $          ; marker: total end
