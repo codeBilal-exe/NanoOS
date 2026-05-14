@@ -9,54 +9,103 @@
  ╚═╝  ╚═══╝ ╚═╝  ╚═╝ ╚═╝  ╚═══╝  ╚═════╝      ╚═════╝ ╚══════╝
 ```
 
-A minimal, educational bootable terminal operating system written entirely in x86 Assembly (16-bit real mode). It bypasses Windows and Linux entirely, booting straight from the BIOS using a custom bootloader.
+NanoOS is a high-performance, minimal, and educational operating system written from scratch in **x86 Assembly**. It operates in 16-bit real mode, booting directly from hardware (or an emulator) to provide a raw, low-level computing experience without the overhead of modern kernels.
 
-## Features
+---
 
-- **Custom Bootloader & Logo:** Reads the kernel from the simulated disk using BIOS `INT 13h`, displays an ASCII art boot logo, and jumps into the kernel.
-- **Dynamic File Authentication:** Intercepts the boot sequence to require a valid username and masked password. It uses a custom text-parsing engine to authenticate dynamically against a raw text file (`users.txt`) compiled into the OS memory!
-- **Terminal Shell:** A fully interactive command-line interface that buffers keyboard input, handles backspace, and executes commands.
-- **Built-in Programs & Commands:**
-  - `calc`: A functional calculator that uses custom `atoi` and `itoa` routines to handle math natively in the CPU without high-level standard libraries.
-  - `help` / `info`: Lists all available commands.
-  - `clear`: Clears the screen and redraws the prompt.
+## 🚀 Core Features
 
-## Project Structure
+- **Custom Stage-1 Bootloader:** A 512-byte BIOS-compliant bootloader that handles hardware initialization, disk I/O via `INT 13h`, and kernel handoff.
+- **Dynamic Security Subsystem:** A built-in authentication engine that verifies users against an embedded database (`users.txt`) with masked password entry.
+- **Categorized Command Shell:** A professional-grade terminal supporting industry-standard commands like `ls`, `clear`, and `run`.
+- **Power Management:** Native support for APM (Advanced Power Management) for software-controlled system shutdown and warm reboots.
+- **Flicker-Free UI:** Optimized BIOS video routines for smooth screen transitions and high-performance text rendering.
 
-- `boot/`: Contains the stage-1 bootloader (`boot.asm`) and the ASCII art logo (`logo.asm`).
-- `kernel/kernel.asm`: The core OS kernel, containing the standard library functions (`atoi`, `itoa`, `strcmp`), the terminal loop, and the command dispatcher.
-- `kernel/system/`: Core system modules like the login loop (`login.asm`) and the user database (`users.txt`).
-- `kernel/programs/`: User-space applications like the calculator (`calc.asm`).
-- `build/`: Temporary output directory for the compiled binaries.
-- `run.bat`: A unified build and execution script for Windows.
+## 🛠️ Integrated Applications
 
-## Quick Start (Windows)
+| Program | Description |
+| :--- | :--- |
+| **Calculator** | Native 16-bit math engine using custom `atoi` and `itoa` routines. |
+| **Animate** | High-performance ASCII animation engine (Starfield, Matrix, and DVD-Bounce). |
+| **Memory** | Real-time system inspector for CPU registers, stack contents, and memory maps. |
 
-**Step 1: Install Required Tools**
-NanoOS requires two tools to be installed on your system:
-- **NASM** (for assembling the code): [Download](https://www.nasm.us/)
-- **QEMU** (for emulating the PC): [Download](https://www.qemu.org/download/#windows)
+---
 
-*(Tip: You can quickly install them via command line by typing `winget install NASM` and `winget install QEMU`)*
+## 📁 Project Organization
 
-**Step 2: Build and Run**
-Simply run the script from your terminal:
-```cmd
+```bash
+NanoOS/
+├── boot/               # Bootloader & BIOS Header Art
+├── kernel/             # Core Kernel Source
+│   ├── system/         # Login, Admin, & User Database
+│   └── kernel.asm      # Main Kernel Entry & System Calls
+├── programs/           # User-space Application Source
+├── build/              # Compiled Binary Artifacts
+├── run.bat             # Unified Build & Emulation Script
+└── README.md           # Documentation
+```
+
+---
+
+## 🚥 Getting Started
+
+### Prerequisites
+
+You will need the following tools installed and available in your system `PATH`:
+- **NASM:** The Netwide Assembler (for compiling `.asm` source).
+- **QEMU:** A generic and open-source machine emulator.
+
+> [!TIP]
+> On Windows, you can install both via winget:
+> `winget install NASM.NASM SoftwareFreedomConservancy.QEMU`
+
+### Building and Running
+
+Simply execute the unified build script to compile the source and launch the OS:
+
+```powershell
 .\run.bat
 ```
-This script will automatically assemble both the bootloader and the kernel, concatenate them into a bootable `os.bin` disk image, and launch it in QEMU.
 
-## Architecture & Boot Flow
-1. **BIOS**: Computes POST, finds our bootable drive, loads the first 512 bytes (`boot.asm`) to `0x7C00`, and executes it.
-2. **Bootloader**: Sets up segment registers and the stack. Prints the ASCII logo, pauses for 1.5 seconds, reads the kernel from the disk into memory at `0x8000`, and jumps to it.
-3. **Kernel Boot**: The kernel calls the `login` module, which drops into an authentication loop until a valid user from `users.txt` is verified.
-4. **Terminal Shell**: Once authenticated, the kernel clears the screen, initializes the terminal loop, listens for `INT 16h` keyboard strokes, and handles command matching/execution.
+The script will:
+1. Assemble the bootloader (`boot.bin`).
+2. Assemble the monolithic kernel with embedded modules (`kernel.bin`).
+3. Concatenate them into a bootable 64KB raw disk image (`os.bin`).
+4. Launch the image in QEMU.
 
-## Roadmap
-- [x] Basic Bootloader
-- [x] Kernel Loading
-- [x] Keyboard Input Loop
-- [x] Terminal Shell and String Matching
-- [x] User Authentication & Dynamic Parsing
-- [x] Built-in Programs (Calculator)
-- [ ] Number Guessing Game
+---
+
+## ⌨️ Command Reference
+
+| Command | Category | Description |
+| :--- | :--- | :--- |
+| `ls` | System | List all available programs. |
+| `run <name>` | System | Execute a program by its name. |
+| `help` | System | Display the categorized help menu. |
+| `clear` | System | Reset the terminal display buffer. |
+| `logout` | System | Terminate the current user session. |
+| `restart` | System | Perform a warm system reboot. |
+| `exit` | System | Shut down the hardware and exit. |
+| `users` | Admin | List all registered system users. |
+| `adduser` | Admin | Register a new user to the database. |
+| `deluser` | Admin | Remove a user from the database. |
+
+---
+
+## 🏗️ Technical Architecture
+
+1. **Bootstrap Phase:** BIOS loads `boot.asm` to `0x7C00`. The bootloader initializes the stack and segment registers.
+2. **Kernel Load:** The bootloader reads 128 sectors (64KB) from the disk starting at Sector 2, loading the monolithic kernel to `0x8000`.
+3. **Authentication Layer:** The kernel immediately transfers control to the `login` module for identity verification.
+4. **Shell Execution:** Upon successful login, the system enters the main terminal loop, listening for `INT 16h` keyboard interrupts and dispatching commands via the system call table.
+
+---
+
+## 🗺️ Roadmap
+
+- [x] Monolithic Kernel Architecture
+- [x] APM-based Power Management
+- [x] Multi-Program Application Layer
+- [x] Admin/User Privilege System
+- [x] Number Guessing Game
+- [ ] FAT-like File System Support (Planned)

@@ -27,7 +27,7 @@ int 0x15
 
 ; Load Kernel from disk
 mov ah, 0x02        ; BIOS read sector function
-mov al, 16          ; Read 16 sectors
+mov al, 128         ; Read 128 sectors (65536 bytes for kernel + all programs)
 mov ch, 0           ; Cylinder 0
 mov dh, 0           ; Head 0
 mov cl, 2           ; Sector 2 (Sector 1 is our bootloader)

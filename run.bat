@@ -7,6 +7,7 @@ echo ============================================
 echo.
 
 REM ---- Check and Install NASM ----
+set "NASM_EXE=nasm"
 where nasm >nul 2>&1
 if %errorlevel% neq 0 (
     echo [!] NASM not found. Attempting to install via winget...
@@ -17,25 +18,34 @@ if %errorlevel% neq 0 (
         pause
         exit /b 1
     )
-    REM Refresh PATH so nasm is found this session
-    for /f "tokens=*" %%i in ('where nasm 2^>nul') do set NASM_EXE=%%i
+    for /f "delims=" %%i in ('where nasm 2^>nul') do set "NASM_EXE=%%i"
     if not defined NASM_EXE (
-        echo [!] NASM installed but not yet in PATH. Please restart your terminal and run again.
+        if exist "C:\Program Files\nasm\nasm.exe" set "NASM_EXE=C:\Program Files\nasm\nasm.exe"
+    )
+    if not defined NASM_EXE (
+        echo [ERROR] NASM installed but not found in PATH.
+        echo         Add the NASM folder to your PATH manually.
+        echo         Example: C:\Program Files\nasm
         pause
         exit /b 1
     )
     echo [OK] NASM installed successfully.
+    if "%NASM_EXE%" == "C:\Program Files\nasm\nasm.exe" (
+        echo [INFO] NASM executable found in default folder but not in PATH.
+        echo [INFO] Add "C:\Program Files\nasm" to PATH or restart your terminal after installation.
+    )
 ) else (
     echo [OK] NASM found.
 )
 
 REM ---- Check and Install QEMU ----
-set QEMU_EXE=qemu-system-i386
+set "QEMU_EXE=qemu-system-i386"
 where qemu-system-i386 >nul 2>&1
 if %errorlevel% neq 0 (
     if exist "C:\Program Files\qemu\qemu-system-i386.exe" (
-        set QEMU_EXE="C:\Program Files\qemu\qemu-system-i386.exe"
+        set "QEMU_EXE=C:\Program Files\qemu\qemu-system-i386.exe"
         echo [OK] QEMU found at default install path.
+        echo [INFO] If QEMU is not in PATH, add "C:\Program Files\qemu" to your PATH.
     ) else (
         echo [!] QEMU not found. Attempting to install via winget...
         winget install --id SoftwareFreedomConservancy.QEMU -e --silent --accept-package-agreements --accept-source-agreements
@@ -45,12 +55,13 @@ if %errorlevel% neq 0 (
             pause
             exit /b 1
         )
-        REM Check default install location
         if exist "C:\Program Files\qemu\qemu-system-i386.exe" (
-            set QEMU_EXE="C:\Program Files\qemu\qemu-system-i386.exe"
+            set "QEMU_EXE=C:\Program Files\qemu\qemu-system-i386.exe"
             echo [OK] QEMU installed successfully.
+            echo [INFO] Add "C:\Program Files\qemu" to PATH if you want QEMU available from any terminal.
         ) else (
-            echo [!] QEMU installed but not found. Please restart your terminal and run again.
+            echo [ERROR] QEMU installed but not found.
+            echo         Please restart your terminal or add QEMU to PATH manually.
             pause
             exit /b 1
         )
@@ -64,7 +75,7 @@ if not exist build mkdir build
 
 echo.
 echo [1/3] Assembling Bootloader...
-nasm -f bin boot\boot.asm -o build\boot.bin
+"%NASM_EXE%" -f bin boot\boot.asm -o build\boot.bin
 if %errorlevel% neq 0 (
     echo [ERROR] Bootloader assembly failed!
     pause
@@ -72,7 +83,7 @@ if %errorlevel% neq 0 (
 )
 
 echo [2/3] Assembling Kernel...
-nasm -f bin kernel\kernel.asm -o build\kernel.bin
+"%NASM_EXE%" -f bin kernel\kernel.asm -o build\kernel.bin
 if %errorlevel% neq 0 (
     echo [ERROR] Kernel assembly failed!
     pause
@@ -81,12 +92,17 @@ if %errorlevel% neq 0 (
 
 echo [3/3] Creating OS Image...
 copy /b build\boot.bin + build\kernel.bin build\os.bin >nul
+if %errorlevel% neq 0 (
+    echo [ERROR] Failed to create OS image.
+    pause
+    exit /b 1
+)
 echo.
 echo ============================================
 echo  Launching NanoOS in QEMU...
 echo ============================================
 echo.
 
-%QEMU_EXE% -drive format=raw,file=build\os.bin
+"%QEMU_EXE%" -drive format=raw,file=build\os.bin 2>nul
 
 pause
