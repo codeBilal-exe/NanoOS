@@ -246,6 +246,14 @@ run_program:
     call strcmp_si
     jc .launch_guess
 
+    mov di, PROG_SNAKE
+    call strcmp_si
+    jc .launch_snake
+
+    mov di, PROG_BMI
+    call strcmp_si
+    jc .launch_bmi
+
     ; Unknown program
     mov bx, MSG_RUN_UNKNOWN
     call print_string
@@ -272,6 +280,14 @@ run_program:
 
 .launch_guess:
     call cmd_guess
+    ret
+
+.launch_snake:
+    call cmd_snake
+    ret
+
+.launch_bmi:
+    call cmd_bmi
     ret
 
 
@@ -692,7 +708,9 @@ MSG_LS_HEADER:     db 13, 10, '  Installed Programs:', 13, 10
 MSG_PROG_LIST:     db '  - calculator', 13, 10
                     db '  - animate', 13, 10
                     db '  - memory', 13, 10
-                    db '  - guess', 13, 10, 13, 10, 0
+                    db '  - guess', 13, 10
+                    db '  - snake', 13, 10
+                    db '  - bmi', 13, 10, 13, 10, 0
 MSG_RUN_UNKNOWN:  db 'run: program not found: ', 0
 
 CMD_HELP:         db 'help', 0
@@ -712,6 +730,8 @@ PROG_CALC:        db 'calculator', 0
 PROG_ANIMATE:     db 'animate', 0
 PROG_MEMORY:      db 'memory', 0
 PROG_GUESS:       db 'guess', 0
+PROG_SNAKE:       db 'snake', 0
+PROG_BMI:         db 'bmi', 0
 rand_seed:        dw 0x3A7F
 
 buffer_index:     db 0
@@ -728,6 +748,8 @@ kernel_boot_drive:db 0x80    ; default hard disk; overwritten at boot
 %include "programs/animate.asm"
 %include "programs/memory.asm"
 %include "programs/guess.asm"
+%include "programs/snake.asm"
+%include "programs/bmi.asm"
 
 ; Pad kernel to 128 sectors (128 * 512 = 65536 bytes)
 times 65536-($-$$) db 0

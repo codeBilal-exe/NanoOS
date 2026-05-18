@@ -1,5 +1,5 @@
 ; -----------------------------
-; Calculator Program
+; NanoOs Calculator Program
 ; -----------------------------
 cmd_calc:
     ; Num 1
